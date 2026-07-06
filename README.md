@@ -2,9 +2,7 @@
 
 A modern, responsive, and gamified **Job Application Tracker** built with **React.js**, **React Router**, **Context API**, and **Tailwind CSS**. It helps users organize and track their job applications through a clean dashboard with an engaging user experience.
 
-## 🌐 Live Demo
 
-👉 https://career-quest-new.vercel.app
 
 ## 📸 Features
 
@@ -51,7 +49,7 @@ src/
 Clone the repository:
 
 ```bash
-git clone https://github.com/Doha-2004/career-quest.git
+git clone https://github.com/Doha-2004/career-quest.vercel
 ```
 
 Install dependencies:
