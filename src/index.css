@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-slate-200 dark:border-white/10;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-body text-slate-800 dark:text-slate-100;
+    background: #f4f5fb;
+  }
+  .dark body {
+    background: #0b0b1a;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+  ::selection {
+    @apply bg-brand-400/30;
+  }
+  :focus-visible {
+    outline: 2px solid #6d4dff;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .bg-app-gradient {
+    background:
+      radial-gradient(1100px 500px at 100% -10%, rgba(139,92,246,0.16), transparent 60%),
+      radial-gradient(900px 500px at -10% 0%, rgba(56,189,248,0.14), transparent 55%),
+      #f4f5fb;
+  }
+  .dark .bg-app-gradient {
+    background:
+      radial-gradient(1100px 500px at 100% -10%, rgba(139,92,246,0.20), transparent 60%),
+      radial-gradient(900px 500px at -10% 0%, rgba(56,189,248,0.12), transparent 55%),
+      #0b0b1a;
+  }
+
+  .glass-panel {
+    @apply bg-white/70 dark:bg-white/[0.05] backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-glass;
+  }
+
+  .glass-card {
+    @apply glass-panel rounded-xl3 transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply shadow-glass-lg -translate-y-0.5;
+  }
+
+  .btn-gradient {
+    @apply bg-gradient-to-r from-brand-500 to-accent-700 text-white font-semibold shadow-glow-brand
+      hover:brightness-110 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100;
+  }
+
+  .btn-ghost {
+    @apply bg-white/60 dark:bg-white/5 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10
+      hover:bg-white/90 dark:hover:bg-white/10 active:scale-[0.98] transition-all duration-200;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl2 border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-white/[0.04]
+      px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400
+      focus:border-brand-400 focus:ring-4 focus:ring-brand-400/15 outline-none transition-all duration-200;
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, rgba(148,163,184,0.15) 25%, rgba(148,163,184,0.28) 37%, rgba(148,163,184,0.15) 63%);
+    background-size: 800px 100%;
+    @apply animate-shimmer rounded-xl2;
+  }
+}
