@@ -1,47 +1,105 @@
-# Career Quest — Job Application Tracker
+# 🚀 Career Quest — Job Application Tracker
 
-A modern, gamified job application tracker built with React, React Router, Context API, and Tailwind CSS. Glassmorphism UI with blue → purple gradient accents, light/dark mode, and full CRUD for job applications — all persisted in `localStorage`.
+A modern, responsive, and gamified **Job Application Tracker** built with **React.js**, **React Router**, **Context API**, and **Tailwind CSS**. It helps users organize and track their job applications through a clean dashboard with an engaging user experience.
 
-## Features
+## 🌐 Live Demo
 
-- **Dashboard** — welcome banner, stat cards (Total / Applied / Interviewing / Offers / Rejected), search, status filter, sort by newest/oldest, and job cards with Quick View.
-- **Add Job** — validated form (company, title, status, date, notes) with save/cancel.
-- **Job Details** — full record view with inline edit and a delete confirmation modal.
-- **Gamification** — a quest progress bar and 4 unlockable achievement badges (First Application, 10 Applications, First Interview, First Offer), plus a motivational message that adapts to your progress.
-- **Global state** via a single `AppContext` (React Context + hooks) — no external state library.
-- **Persistence** — all applications and your theme preference are saved to `localStorage` automatically.
-- **Routing** — React Router with `/`, `/add`, and `/job/:id`.
-- **Bonus** — export/import applications as JSON, dark mode toggle, empty states, loading skeletons, toast notifications, and a fully responsive nav.
+👉 https://career-quest-new.vercel.app
 
-## Getting started
+## 📸 Features
+
+- 📊 Dashboard with application statistics
+- 🔍 Search and filter job applications
+- ➕ Add new applications
+- ✏️ Edit existing applications
+- 🗑️ Delete applications with confirmation modal
+- 📅 Track application date and current status
+- 🎯 Gamification system with achievements
+- 📈 Progress bar for job search journey
+- 🌙 Dark / Light Mode
+- 💾 Data persistence using LocalStorage
+- 📤 Export applications as JSON
+- 📥 Import applications from JSON
+- 📱 Fully responsive design
+- 🔔 Toast notifications
+- ⚡ Loading skeletons
+
+## 🛠️ Tech Stack
+
+- React.js
+- React Router
+- Context API
+- Tailwind CSS
+- LocalStorage
+- Lucide React
+
+## 📂 Project Structure
+
+```text
+src/
+ ├── components/
+ ├── context/
+ ├── pages/
+ ├── utils/
+ ├── App.jsx
+ ├── main.jsx
+ └── index.css
+```
+
+## 🚀 Getting Started
+
+Clone the repository:
+
+```bash
+git clone https://github.com/Doha-2004/career-quest.git
+```
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Run the development server:
+
+```bash
 npm run dev
 ```
 
-Then open the printed local URL (typically `http://localhost:5173`).
-
-To build for production:
+Build for production:
 
 ```bash
 npm run build
+```
+
+Preview production build:
+
+```bash
 npm run preview
 ```
 
-## Project structure
+## 💡 Key Concepts Practiced
 
-```
-src/
-  components/       Reusable, presentation-focused UI pieces
-  context/           AppContext — the single source of truth for jobs/theme/toasts
-  pages/             Dashboard, AddJob, JobDetails, NotFound
-  utils/             constants, localStorage helpers, achievements/gamification logic
-  App.jsx            Route definitions + layout shell
-  main.jsx           Entry point (BrowserRouter + AppProvider)
-  index.css          Tailwind directives + glassmorphism utility classes
-```
+- React Components
+- React Hooks
+- React Router
+- Context API
+- State Management
+- Form Validation
+- CRUD Operations
+- Responsive Design
+- LocalStorage
+- JSON Import & Export
+## 🌐 Live Demo
 
-## Notes on data
+https://career-quest-new.vercel.app
 
-Sample applications are seeded on first run so the dashboard isn't empty. Delete them freely — your own data always takes over once you add or import applications, and everything persists across reloads via `localStorage`.
+## 💻 GitHub Repository
+
+https://github.com/Doha-2004/career-quest.vercel
+
+## 👩‍💻 Developed By
+
+**Doha Emad**
+
+If you like this project, don't forget to ⭐ the repository!
