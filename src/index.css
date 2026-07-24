@@ -70,6 +70,15 @@
       focus:border-brand-400 focus:ring-4 focus:ring-brand-400/15 outline-none transition-all duration-200;
   }
 
+  /* Native <option> popups are rendered by the OS/browser with a light
+     background regardless of our dark mode class. Without this, options
+     inherit the select's light text color in dark mode and become
+     unreadable against that white popup. Force a fixed, readable pairing. */
+  select.input-field option {
+    color: #1e293b;
+    background-color: #ffffff;
+  }
+
   .skeleton {
     background: linear-gradient(90deg, rgba(148,163,184,0.15) 25%, rgba(148,163,184,0.28) 37%, rgba(148,163,184,0.15) 63%);
     background-size: 800px 100%;

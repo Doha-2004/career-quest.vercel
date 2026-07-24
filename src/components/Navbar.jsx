@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { Compass, Plus, Moon, SunMedium, Download, Upload, Menu, X } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
+import { computeStatistics } from '../utils/stats'
 
 export default function Navbar() {
   const { theme, toggleTheme, jobs, importJobs, showToast } = useAppContext()
@@ -9,7 +10,13 @@ export default function Navbar() {
   const fileInputRef = useRef(null)
 
   const handleExport = () => {
-    const blob = new Blob([JSON.stringify(jobs, null, 2)], { type: 'application/json' })
+    const exportPayload = {
+      exportDate: new Date().toISOString(),
+      totalJobs: jobs.length,
+      statistics: computeStatistics(jobs),
+      jobs,
+    }
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url

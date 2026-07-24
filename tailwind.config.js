@@ -62,6 +62,10 @@ export default {
           '0%': { width: '0%' },
           '100%': { width: 'var(--progress-width, 0%)' },
         },
+        confettiFall: {
+          '0%': { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+          '100%': { transform: 'translate(var(--drift, 0px), 105vh) rotate(var(--rotate, 360deg))', opacity: 0.4 },
+        },
       },
       animation: {
         floatSlow: 'floatSlow 6s ease-in-out infinite',
@@ -69,6 +73,7 @@ export default {
         fadeUp: 'fadeUp 0.35s ease-out',
         shimmer: 'shimmer 1.6s linear infinite',
         progressFill: 'progressFill 1s ease-out forwards',
+        confettiFall: 'confettiFall linear forwards',
       },
     },
   },

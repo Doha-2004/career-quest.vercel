@@ -2,6 +2,7 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import ToastContainer from './components/Toast'
+import ConfettiOverlay from './components/ConfettiOverlay'
 import Dashboard from './pages/Dashboard'
 import AddJob from './pages/AddJob'
 import JobDetails from './pages/JobDetails'
@@ -20,6 +21,7 @@ export default function App() {
         </Routes>
       </main>
       <ToastContainer />
+      <ConfettiOverlay />
     </div>
   )
 }

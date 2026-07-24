@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Briefcase, Send, MessagesSquare, Trophy, XCircle } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
-import { STATUS } from '../utils/constants'
+import { computeStatistics } from '../utils/stats'
 import { getUnlockedAchievements, getQuestProgress, getMotivationalMessage } from '../utils/achievements'
 import StatCard from '../components/StatCard'
 import SearchBar from '../components/SearchBar'
@@ -10,42 +10,54 @@ import JobCard from '../components/JobCard'
 import EmptyState from '../components/EmptyState'
 import QuestProgressBar from '../components/QuestProgressBar'
 import AchievementBadges from '../components/AchievementBadges'
+import InterviewAlertCard from '../components/InterviewAlertCard'
+import UpcomingInterviews, { InterviewTodayBanner } from '../components/UpcomingInterviews'
+import AnalyticsCharts from '../components/AnalyticsCharts'
+import StatisticsPanel from '../components/StatisticsPanel'
 import PageTransition from '../components/PageTransition'
 import { StatCardSkeleton, JobCardSkeleton } from '../components/LoadingSkeleton'
 
 export default function Dashboard() {
-  const { jobs, isLoading } = useAppContext()
+  const { jobs, isLoading, alertThreshold } = useAppContext()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('All')
   const [sortOrder, setSortOrder] = useState('newest')
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
 
-  const stats = useMemo(
-    () => ({
-      total: jobs.length,
-      applied: jobs.filter((j) => j.status === STATUS.APPLIED).length,
-      interviewing: jobs.filter((j) => j.status === STATUS.INTERVIEWING).length,
-      offers: jobs.filter((j) => j.status === STATUS.OFFER).length,
-      rejected: jobs.filter((j) => j.status === STATUS.REJECTED).length,
-    }),
-    [jobs]
-  )
+  // Single source of truth for every count/rate shown across the dashboard,
+  // the analytics charts, and the JSON export.
+  const stats = useMemo(() => computeStatistics(jobs), [jobs])
 
   const achievements = useMemo(() => getUnlockedAchievements(jobs), [jobs])
   const progress = useMemo(() => getQuestProgress(jobs), [jobs])
   const motivation = useMemo(() => getMotivationalMessage(jobs), [jobs])
 
+  const showInterviewAlert = useMemo(
+    () => stats.applied >= alertThreshold && stats.interviewing === 0,
+    [stats.applied, stats.interviewing, alertThreshold]
+  )
+
   const filteredJobs = useMemo(() => {
     let result = [...jobs]
     if (search.trim()) {
       const q = search.trim().toLowerCase()
-      result = result.filter((j) => j.company.toLowerCase().includes(q) || j.title.toLowerCase().includes(q))
+      result = result.filter(
+        (j) =>
+          j.company.toLowerCase().includes(q) ||
+          j.title.toLowerCase().includes(q) ||
+          (j.notes || '').toLowerCase().includes(q) ||
+          (j.jobPostLink || '').toLowerCase().includes(q)
+      )
     }
     if (statusFilter !== 'All') {
       result = result.filter((j) => j.status === statusFilter)
     }
+    if (favoritesOnly) {
+      result = result.filter((j) => j.isFavorite)
+    }
     result.sort((a, b) => (sortOrder === 'newest' ? b.createdAt - a.createdAt : a.createdAt - b.createdAt))
     return result
-  }, [jobs, search, statusFilter, sortOrder])
+  }, [jobs, search, statusFilter, sortOrder, favoritesOnly])
 
   const hasAnyJobs = jobs.length > 0
   const hasFilteredResults = filteredJobs.length > 0
@@ -60,6 +72,16 @@ export default function Dashboard() {
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 sm:text-base">{motivation}</p>
         </div>
+
+        {/* Interview today banner */}
+        {!isLoading && <InterviewTodayBanner jobs={jobs} />}
+
+        {/* Smart Job Search Alert */}
+        {!isLoading && showInterviewAlert && (
+          <div className="mb-6">
+            <InterviewAlertCard />
+          </div>
+        )}
 
         {/* Stats */}
         <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -86,10 +108,34 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Upcoming interviews */}
+        {!isLoading && <UpcomingInterviews jobs={jobs} />}
+
+        {/* Analytics */}
+        {!isLoading && hasAnyJobs && (
+          <div className="mb-6">
+            <AnalyticsCharts jobs={jobs} />
+          </div>
+        )}
+
+        {/* Statistics */}
+        {!isLoading && hasAnyJobs && (
+          <div className="mb-6">
+            <StatisticsPanel stats={stats} />
+          </div>
+        )}
+
         {/* Search + filters */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <SearchBar value={search} onChange={setSearch} />
-          <FilterBar statusFilter={statusFilter} onStatusChange={setStatusFilter} sortOrder={sortOrder} onSortChange={setSortOrder} />
+          <SearchBar value={search} onChange={setSearch} placeholder="Search company, role, notes, or link…" />
+          <FilterBar
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            sortOrder={sortOrder}
+            onSortChange={setSortOrder}
+            favoritesOnly={favoritesOnly}
+            onFavoritesToggle={() => setFavoritesOnly((v) => !v)}
+          />
         </div>
 
         {/* Job list */}
@@ -101,8 +147,8 @@ export default function Dashboard() {
           </div>
         ) : !hasAnyJobs ? (
           <EmptyState
-            title="No applications yet"
-            description="Start your quest by logging the first role you've applied to. Every great job search begins with one entry."
+            title="Start your job search journey."
+            description="Log your first application to begin tracking offers, interviews, and everything in between."
           />
         ) : !hasFilteredResults ? (
           <EmptyState

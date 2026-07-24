@@ -34,7 +34,32 @@ export const STATUS_STYLES = {
 export const STORAGE_KEYS = {
   JOBS: 'careerquest.jobs',
   THEME: 'careerquest.theme',
+  ALERT_THRESHOLD: 'careerquest.alertThreshold',
 }
+
+export const DEFAULT_INTERVIEW_ALERT_THRESHOLD = 10
+
+// Days an "Applied" job can sit with no status change before we flag it
+export const NO_RESPONSE_DAYS_THRESHOLD = 30
+
+export const INTERVIEW_TYPES = ['Online', 'Onsite', 'Phone']
+
+// Cosmetic stages shown on the Job Details timeline. "Recruiter Viewed" and
+// "Assessment" aren't tracked as real statuses (we don't want to expand the
+// core status model), so they're treated as implicitly passed once a job
+// reaches Interviewing — see utils/timeline.js for the mapping logic.
+export const TIMELINE_STAGES = ['Applied', 'Recruiter Viewed', 'Assessment', 'Interview', 'Offer']
+
+// Chart colors mapped 1:1 with STATUS_STYLES dots, kept in one place so
+// Recharts and badges never drift out of sync with each other.
+export const STATUS_CHART_COLORS = {
+  [STATUS.APPLIED]: '#0ea5e9',
+  [STATUS.INTERVIEWING]: '#f59e0b',
+  [STATUS.OFFER]: '#10b981',
+  [STATUS.REJECTED]: '#f43f5e',
+}
+
+export const CHART_ACCENT = '#6d4dff'
 
 // A small deterministic palette used to color company-initial placeholders
 export const LOGO_PALETTE = [

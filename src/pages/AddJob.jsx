@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { Save, X, Briefcase } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
 import { STATUS, STATUS_LIST } from '../utils/constants'
+import { isValidUrl } from '../utils/validation'
 import FormField from '../components/FormField'
+import SelectField from '../components/SelectField'
+import InterviewFields from '../components/InterviewFields'
 import PageTransition from '../components/PageTransition'
 
 const todayStr = () => new Date().toISOString().slice(0, 10)
@@ -18,6 +21,11 @@ export default function AddJob() {
     status: STATUS.APPLIED,
     appliedDate: todayStr(),
     notes: '',
+    jobPostLink: '',
+    interviewDate: '',
+    interviewTime: '',
+    interviewType: '',
+    interviewNotes: '',
   })
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
@@ -36,6 +44,9 @@ export default function AddJob() {
     } else if (new Date(form.appliedDate) > new Date(todayStr())) {
       next.appliedDate = 'Application date cannot be in the future.'
     }
+    if (form.jobPostLink.trim() && !isValidUrl(form.jobPostLink)) {
+      next.jobPostLink = 'Enter a valid URL (e.g. https://company.com/job/123).'
+    }
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -50,6 +61,11 @@ export default function AddJob() {
       status: form.status,
       appliedDate: form.appliedDate,
       notes: form.notes.trim(),
+      jobPostLink: form.jobPostLink.trim(),
+      interviewDate: form.status === STATUS.INTERVIEWING ? form.interviewDate : '',
+      interviewTime: form.status === STATUS.INTERVIEWING ? form.interviewTime : '',
+      interviewType: form.status === STATUS.INTERVIEWING ? form.interviewType : '',
+      interviewNotes: form.status === STATUS.INTERVIEWING ? form.interviewNotes.trim() : '',
     })
     navigate(`/job/${id}`)
   }
@@ -90,13 +106,13 @@ export default function AddJob() {
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <FormField label="Status" required>
-              <select value={form.status} onChange={(e) => update('status', e.target.value)} className="input-field cursor-pointer">
-                {STATUS_LIST.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+              <SelectField
+                value={form.status}
+                onChange={(e) => update('status', e.target.value)}
+                options={STATUS_LIST.map((s) => ({ value: s, label: s }))}
+                ariaLabel="Application status"
+                fullWidth
+              />
             </FormField>
 
             <FormField label="Application Date" required error={errors.appliedDate}>
@@ -110,6 +126,10 @@ export default function AddJob() {
             </FormField>
           </div>
 
+          {form.status === STATUS.INTERVIEWING && (
+            <InterviewFields form={form} onChange={update} errors={errors} />
+          )}
+
           <FormField label="Notes" hint="Interview prep, contacts, salary details — anything worth remembering.">
             <textarea
               value={form.notes}
@@ -117,6 +137,16 @@ export default function AddJob() {
               placeholder="Add any details about this application…"
               rows={5}
               className="input-field resize-none"
+            />
+          </FormField>
+
+          <FormField label="Job Post Link" error={errors.jobPostLink} hint="Optional — paste the original job posting URL.">
+            <input
+              type="url"
+              value={form.jobPostLink}
+              onChange={(e) => update('jobPostLink', e.target.value)}
+              placeholder="https://company.com/job/..."
+              className="input-field"
             />
           </FormField>
 

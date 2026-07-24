@@ -1,31 +1,42 @@
 import React, { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Pencil, Trash2, Save, X, Calendar, NotebookText } from 'lucide-react'
+import { ArrowLeft, Pencil, Trash2, Save, X, Calendar, NotebookText, CalendarClock } from 'lucide-react'
 import { useAppContext } from '../context/AppContext'
-import { STATUS_LIST } from '../utils/constants'
+import { STATUS, STATUS_LIST } from '../utils/constants'
+import { isValidUrl } from '../utils/validation'
+import { formatDateLong } from '../utils/dateUtils'
 import CompanyLogo from '../components/CompanyLogo'
 import StatusBadge from '../components/StatusBadge'
 import FormField from '../components/FormField'
+import SelectField from '../components/SelectField'
+import JobPostLink from '../components/JobPostLink'
+import InterviewFields from '../components/InterviewFields'
+import FavoriteToggle from '../components/FavoriteToggle'
+import ApplicationTimeline from '../components/ApplicationTimeline'
 import ConfirmModal from '../components/ConfirmModal'
 import EmptyState from '../components/EmptyState'
 import PageTransition from '../components/PageTransition'
 
-function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  const d = new Date(`${dateStr}T00:00:00`)
-  if (Number.isNaN(d.getTime())) return dateStr
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+function withDefaults(job) {
+  return {
+    ...job,
+    jobPostLink: job.jobPostLink || '',
+    interviewDate: job.interviewDate || '',
+    interviewTime: job.interviewTime || '',
+    interviewType: job.interviewType || '',
+    interviewNotes: job.interviewNotes || '',
+  }
 }
 
 export default function JobDetails() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { getJobById, updateJob, deleteJob } = useAppContext()
+  const { getJobById, updateJob, deleteJob, toggleFavorite } = useAppContext()
   const job = getJobById(id)
 
   const [isEditing, setIsEditing] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [form, setForm] = useState(job ? { ...job } : null)
+  const [form, setForm] = useState(job ? withDefaults(job) : null)
   const [errors, setErrors] = useState({})
 
   if (!job) {
@@ -58,24 +69,33 @@ export default function JobDetails() {
     if (!form.company.trim()) next.company = 'Company name is required.'
     if (!form.title.trim()) next.title = 'Job title is required.'
     if (!form.appliedDate) next.appliedDate = 'Application date is required.'
+    if (form.jobPostLink.trim() && !isValidUrl(form.jobPostLink)) {
+      next.jobPostLink = 'Enter a valid URL (e.g. https://company.com/job/123).'
+    }
     setErrors(next)
     return Object.keys(next).length === 0
   }
 
   const handleSave = () => {
     if (!validate()) return
+    const isInterviewing = form.status === STATUS.INTERVIEWING
     updateJob(job.id, {
       company: form.company.trim(),
       title: form.title.trim(),
       status: form.status,
       appliedDate: form.appliedDate,
       notes: form.notes.trim(),
+      jobPostLink: form.jobPostLink.trim(),
+      interviewDate: isInterviewing ? form.interviewDate : '',
+      interviewTime: isInterviewing ? form.interviewTime : '',
+      interviewType: isInterviewing ? form.interviewType : '',
+      interviewNotes: isInterviewing ? form.interviewNotes.trim() : '',
     })
     setIsEditing(false)
   }
 
   const handleCancelEdit = () => {
-    setForm({ ...job })
+    setForm(withDefaults(job))
     setErrors({})
     setIsEditing(false)
   }
@@ -84,6 +104,9 @@ export default function JobDetails() {
     deleteJob(job.id)
     navigate('/')
   }
+
+  const hasInterviewInfo =
+    job.status === STATUS.INTERVIEWING && (job.interviewDate || job.interviewTime || job.interviewType || job.interviewNotes)
 
   return (
     <PageTransition>
@@ -103,7 +126,10 @@ export default function JobDetails() {
                 <div className="flex items-center gap-4">
                   <CompanyLogo company={job.company} size="lg" />
                   <div>
-                    <h1 className="font-display text-xl font-extrabold text-slate-800 dark:text-white sm:text-2xl">{job.title}</h1>
+                    <div className="flex items-center gap-2">
+                      <h1 className="font-display text-xl font-extrabold text-slate-800 dark:text-white sm:text-2xl">{job.title}</h1>
+                      <FavoriteToggle isFavorite={Boolean(job.isFavorite)} onToggle={() => toggleFavorite(job.id)} />
+                    </div>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{job.company}</p>
                   </div>
                 </div>
@@ -114,8 +140,37 @@ export default function JobDetails() {
 
               <div className="mb-6 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                 <Calendar size={16} className="text-brand-500" />
-                Applied on <span className="font-semibold">{formatDate(job.appliedDate)}</span>
+                Applied on <span className="font-semibold">{formatDateLong(job.appliedDate)}</span>
               </div>
+
+              {hasInterviewInfo && (
+                <div className="mb-6 rounded-xl2 border border-amber-200/60 bg-amber-50/50 p-4 dark:border-amber-400/20 dark:bg-amber-400/[0.05]">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-bold text-amber-700 dark:text-amber-300">
+                    <CalendarClock size={16} />
+                    Interview Details
+                  </div>
+                  <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-600 dark:text-slate-300">
+                    {job.interviewDate && (
+                      <span>
+                        <span className="font-semibold">Date:</span> {formatDateLong(job.interviewDate)}
+                      </span>
+                    )}
+                    {job.interviewTime && (
+                      <span>
+                        <span className="font-semibold">Time:</span> {job.interviewTime}
+                      </span>
+                    )}
+                    {job.interviewType && (
+                      <span>
+                        <span className="font-semibold">Type:</span> {job.interviewType}
+                      </span>
+                    )}
+                  </div>
+                  {job.interviewNotes && (
+                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{job.interviewNotes}</p>
+                  )}
+                </div>
+              )}
 
               <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
                 <NotebookText size={16} className="text-brand-500" />
@@ -124,6 +179,16 @@ export default function JobDetails() {
               <p className="whitespace-pre-wrap rounded-xl2 bg-slate-50/70 p-4 text-sm leading-relaxed text-slate-600 dark:bg-white/[0.03] dark:text-slate-300">
                 {job.notes?.trim() ? job.notes : 'No notes added yet.'}
               </p>
+
+              {job.jobPostLink?.trim() && (
+                <div className="mt-4">
+                  <JobPostLink url={job.jobPostLink} />
+                </div>
+              )}
+
+              <div className="my-7 h-px bg-slate-200/70 dark:bg-white/10" />
+
+              <ApplicationTimeline status={job.status} />
 
               <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button
@@ -156,13 +221,13 @@ export default function JobDetails() {
 
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <FormField label="Status" required>
-                    <select value={form.status} onChange={(e) => update('status', e.target.value)} className="input-field cursor-pointer">
-                      {STATUS_LIST.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
+                    <SelectField
+                      value={form.status}
+                      onChange={(e) => update('status', e.target.value)}
+                      options={STATUS_LIST.map((s) => ({ value: s, label: s }))}
+                      ariaLabel="Application status"
+                      fullWidth
+                    />
                   </FormField>
 
                   <FormField label="Application Date" required error={errors.appliedDate}>
@@ -176,8 +241,22 @@ export default function JobDetails() {
                   </FormField>
                 </div>
 
+                {form.status === STATUS.INTERVIEWING && (
+                  <InterviewFields form={form} onChange={update} errors={errors} />
+                )}
+
                 <FormField label="Notes">
                   <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} rows={5} className="input-field resize-none" />
+                </FormField>
+
+                <FormField label="Job Post Link" error={errors.jobPostLink} hint="Optional — paste the original job posting URL.">
+                  <input
+                    type="url"
+                    value={form.jobPostLink}
+                    onChange={(e) => update('jobPostLink', e.target.value)}
+                    placeholder="https://company.com/job/..."
+                    className="input-field"
+                  />
                 </FormField>
 
                 <div className="mt-2 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
