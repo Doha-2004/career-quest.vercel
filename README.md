@@ -1,4 +1,4 @@
-# 🚀 Career Quest — Job Application Tracker (v2)
+# 🚀 Career Quest — Job Application Tracker 
 
 A modern, responsive, and gamified **Job Application Tracker** built with **React.js**, **React Router**, **Context API**, **Tailwind CSS**, and **Recharts**.
 
